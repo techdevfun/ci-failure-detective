@@ -1,0 +1,30 @@
+$ npm test
+
+> shop-api@2.4.1 test
+> jest --ci --runInBand
+
+PASS src/routes/health.test.js
+FAIL src/auth/session.test.js
+  ● Session › refreshes token before expiry
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      41 |     const ok = await refreshIfNeeded(session, Date.now() + 1000);
+    > 42 |     expect(ok).toBe(true);
+         |                ^
+      43 |   });
+
+      at Object.<anonymous> (src/auth/session.test.js:42:18)
+
+ › 1 snapshot failed.
+ › Retrying failed tests once with --onlyFailures…
+
+PASS src/auth/session.test.js (4.981 s)
+
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       1 failed, 32 passed, 33 total
+Snapshots:   0 total
+Time:        9.104 s

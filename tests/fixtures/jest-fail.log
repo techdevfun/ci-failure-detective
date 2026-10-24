@@ -1,0 +1,47 @@
+$ npm test
+
+> shop-api@2.4.1 test
+> jest --ci --runInBand
+
+PASS src/routes/health.test.js
+PASS src/utils/format.test.js
+FAIL src/cart/pricing.test.js
+  ● Cart pricing › applies bulk discount over 10 items
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 8991
+    Received: 9080
+
+      12 |     const cart = buildCart([{ sku: "A-1", qty: 12, price: 749 }]);
+      13 |     const total = applyBulkDiscount(cart);
+    > 14 |     expect(total).toBe(8991);
+         |                  ^
+      15 |   });
+
+      at Object.<anonymous> (src/cart/pricing.test.js:14:18)
+
+  ● Cart pricing › rounds tax to 2 decimals
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 10.08
+    Received: 10.079999999999998
+
+      28 |     const cart = buildCart([{ sku: "B-2", qty: 3, price: 3.36 }]);
+      29 |     const total = withTax(cart, 0.0);
+    > 30 |     expect(total).toBe(10.08);
+         |                  ^
+      31 |   });
+
+      at Object.<anonymous> (src/cart/pricing.test.js:30:18)
+
+PASS src/auth/session.test.js (5.214 s)
+
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       2 failed, 31 passed, 33 total
+Snapshots:   0 total
+Time:        8.392 s
+Ran all test suites.
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1

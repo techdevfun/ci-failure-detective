@@ -1,0 +1,34 @@
+# Example: use CI Failure Detective in your workflow.
+#
+# 1. Pipe your test command through `tee` so the log is saved.
+# 2. On failure, run the detective — it posts a diagnosis to the Job Summary.
+# 3. Commit `.cifd-history.jsonl` and record each run to enable flaky detection.
+
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Run tests (save the log)
+        run: npm test 2>&1 | tee ci.log
+
+      - name: Diagnose the failure
+        if: failure()
+        uses: techdevfun/ci-failure-detective@v1
+        with:
+          log-file: ci.log
+
+      - name: Record this run for flaky detection
+        if: always()
+        run: |
+          node node_modules/ci-failure-detective/bin/cifd.js record \
+            --commit "$GITHUB_SHA" --branch "$GITHUB_REF_NAME" < ci.log || true

@@ -1,0 +1,23 @@
+{
+  "bin": {
+    "cifd": "./bin/cifd.js"
+  },
+  "description": "Find the first real error in a failed CI log, tell flaky tests apart from real breakage, and cluster repeat failures. Zero dependencies.",
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "ci",
+    "github-actions",
+    "flaky-tests",
+    "test-analytics",
+    "devops"
+  ],
+  "license": "MIT",
+  "name": "ci-failure-detective",
+  "scripts": {
+    "test": "node --test tests/detective.test.js tests/errors.test.js tests/flaky.test.js tests/parsers.test.js tests/signature.test.js"
+  },
+  "type": "module",
+  "version": "0.1.0"
+}

@@ -1,0 +1,9 @@
+npm ERR! code ECONNRESET
+npm ERR! network request to https://registry.npmjs.org/pg failed, reason: socket hang up
+npm ERR! network This is a problem related to network connectivity.
+npm ERR! network In most cases you are behind a proxy or have bad network settings.
+npm ERR! network
+npm ERR! network If you are behind a proxy, please make sure that the
+npm ERR! network 'proxy' config is set properly.  See: 'npm help config'
+npm ERR! A complete log of this run can be found in: /root/.npm/_logs/2026-10-24T06-12-44-001Z-debug-0.log
+Error: Process completed with exit code 1.

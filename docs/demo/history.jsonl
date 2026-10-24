@@ -1,0 +1,6 @@
+{"ts":1792834723499,"commit":"1111111","branch":"","name":"Cart pricing › applies bulk discount over 10 items","file":"src/cart/pricing.test.js","framework":"jest","signature":"4f709b012d30","categoryId":"test-failure","passed":false}
+{"ts":1792834723499,"commit":"1111111","branch":"","name":"Cart pricing › rounds tax to 2 decimals","file":"src/cart/pricing.test.js","framework":"jest","signature":"4f709b012d30","categoryId":"test-failure","passed":false}
+{"ts":1792834723722,"commit":"2222222","branch":"","name":"Cart pricing › applies bulk discount over 10 items","file":"src/cart/pricing.test.js","framework":"jest","signature":"4f709b012d30","categoryId":"test-failure","passed":false}
+{"ts":1792834723722,"commit":"2222222","branch":"","name":"Cart pricing › rounds tax to 2 decimals","file":"src/cart/pricing.test.js","framework":"jest","signature":"4f709b012d30","categoryId":"test-failure","passed":false}
+{"ts":1792834723857,"commit":"3333333","branch":"","name":"Session › refreshes token before expiry","file":"src/auth/session.test.js","framework":"jest","signature":"d1cae59d4dc8","categoryId":"test-failure","passed":false}
+{"ts":1792834724006,"commit":"4444444","branch":"","passed":false,"run":true,"signature":"5ca5b0a734be","categoryId":"dependency-install"}

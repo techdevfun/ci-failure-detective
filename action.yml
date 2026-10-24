@@ -1,0 +1,76 @@
+name: "CI Failure Detective"
+description: "Find the first real error in a failed CI log, tell flaky tests apart from real breakage, and cluster repeat failures — locally, with zero dependencies."
+author: "techdevfun"
+branding:
+  icon: "search"
+  color: "blue"
+
+inputs:
+  log-file:
+    description: "Path to the CI log file to analyze (captured with `tee` or from an artifact)."
+    required: false
+    default: ""
+  history-file:
+    description: "Path to the JSONL run-history file (committed in the repo, e.g. .cifd-history.jsonl)."
+    required: false
+    default: ".cifd-history.jsonl"
+  commit:
+    description: "Commit SHA of this run (defaults to $GITHUB_SHA)."
+    required: false
+    default: ""
+  fail-on-real:
+    description: "Exit non-zero when the verdict is 'real-failure' (useful to gate merges)."
+    required: false
+    default: "false"
+  summary:
+    description: "Append the markdown report to $GITHUB_STEP_SUMMARY."
+    required: false
+    default: "true"
+
+outputs:
+  verdict:
+    description: "One of: real-failure, flaky, mixed, infra, unknown."
+    value: ${{ steps.detect.outputs.verdict }}
+  signature:
+    description: "Stable 12-char signature of this failure (for clustering)."
+    value: ${{ steps.detect.outputs.signature }}
+  report-json:
+    description: "Full JSON report."
+    value: ${{ steps.detect.outputs.report-json }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Analyze CI log
+      id: detect
+      shell: bash
+      run: |
+        CIFD_DIR="${{ github.action_path }}"
+        LOG_FILE="${{ inputs.log-file }}"
+        if [ -z "$LOG_FILE" ]; then
+          echo "::error::ci-failure-detective: 'log-file' input is required (pipe your test command through 'tee' first, e.g. 'npm test 2>&1 | tee ci.log')"
+          exit 2
+        fi
+        node "$CIFD_DIR/bin/cifd.js" analyze "$LOG_FILE" \
+          --history "${{ inputs.history-file }}" \
+          --commit "${{ inputs.commit }}" > /tmp/cifd-report.json
+        VERDICT=$(node -e "console.log(JSON.parse(require('fs').readFileSync('/tmp/cifd-report.json','utf8')).verdict)")
+        SIG=$(node -e "console.log(JSON.parse(require('fs').readFileSync('/tmp/cifd-report.json','utf8')).signature)")
+        echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
+        echo "signature=$SIG" >> "$GITHUB_OUTPUT"
+        {
+          echo "report-json<<EOF"
+          cat /tmp/cifd-report.json
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
+        if [ "${{ inputs.summary }}" = "true" ]; then
+          node "$CIFD_DIR/bin/cifd.js" analyze "$LOG_FILE" \
+            --history "${{ inputs.history-file }}" \
+            --commit "${{ inputs.commit }}" \
+            --format md >> "$GITHUB_STEP_SUMMARY"
+        fi
+        if [ "${{ inputs.fail-on-real }}" = "true" ] && [ "$VERDICT" = "real-failure" ]; then
+          echo "::error::ci-failure-detective: real failure detected (signature $SIG)"
+          exit 1
+        fi
+        echo "ci-failure-detective verdict: $VERDICT (signature $SIG)"

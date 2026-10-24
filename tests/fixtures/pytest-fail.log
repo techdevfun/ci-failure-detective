@@ -1,0 +1,29 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.4, pluggy-1.5.0
+rootdir: /home/runner/work/billing/billing
+configfile: pyproject.toml
+collected 48 items
+
+tests/test_invoices.py ............                                      [ 25%]
+tests/test_payments.py ........F....                                      [ 52%]
+tests/test_refunds.py ............                                       [ 77%]
+tests/test_webhooks.py ..........                                        [100%]
+
+=================================== FAILURES ===================================
+_________________ test_payment_retry_exhaustion _________________
+
+    def test_payment_retry_exhaustion():
+        gateway = FakeGateway(fail_times=3)
+        processor = PaymentProcessor(gateway, max_retries=3)
+>       with pytest.raises(PaymentFailed):
+E       Failed: DID NOT RAISE <class 'billing.errors.PaymentFailed'>
+
+tests/test_payments.py:88: Failed
+----------------------------- Captured stdout call -----------------------------
+[gateway] attempt 1 failed: timeout
+[gateway] attempt 2 failed: timeout
+[gateway] attempt 3 failed: timeout
+[gateway] attempt 4 succeeded
+=========================== short test summary info ============================
+FAILED tests/test_payments.py::test_payment_retry_exhaustion - Failed: DID NOT RAISE <class 'billing.errors.PaymentFailed'>
+======================== 1 failed, 47 passed in 12.04s =========================

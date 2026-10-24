@@ -1,0 +1,10 @@
+ok  	github.com/acme/orders/internal/auth	0.412s
+--- FAIL: TestCheckoutIdempotency (1.87s)
+    checkout_test.go:142: duplicate checkout created second order: want 1 order, got 2
+    checkout_test.go:143: request ids: req-88121, req-88121
+FAIL	github.com/acme/orders/internal/checkout	2.104s
+ok  	github.com/acme/orders/internal/inventory	0.903s
+--- FAIL: TestInventoryReservationTimeout (4.21s)
+    inventory_test.go:67: reservation not released after timeout: still held after 4s
+FAIL	github.com/acme/orders/internal/inventory	4.455s
+FAIL

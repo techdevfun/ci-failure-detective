@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm test
+      - name: Dogfood — analyze a failing fixture
+        run: |
+          node bin/cifd.js analyze tests/fixtures/jest-fail.log --format md >> $GITHUB_STEP_SUMMARY
+          node bin/cifd.js analyze tests/fixtures/pytest-fail.log --format json | node -e "const r=JSON.parse(require('fs').readFileSync(0,'utf8')); if(r.verdict!=='unknown'||r.category.id!=='test-failure') process.exit(1)"
+
+  action-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate action.yml
+        run: node -e "const y=require('fs').readFileSync('action.yml','utf8'); for (const k of ['name:','description:','runs:','inputs:','outputs:']) if(!y.includes(k)) throw new Error('missing '+k); console.log('action.yml OK')"
