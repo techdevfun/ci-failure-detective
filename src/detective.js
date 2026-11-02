@@ -24,6 +24,7 @@ function splitLines(text) {
  * @param {Array}  opts.history  past run records for flaky scoring/clustering
  * @param {string} opts.commit   commit SHA of this run (for flaky scoring)
  * @param {string} opts.branch
+ * @param {boolean} opts.historyFound  true when the --history file existed (so the no-history reason says the right thing)
  * @returns {object} report
  */
 export function analyze(logText, opts = {}) {
@@ -43,7 +44,9 @@ export function analyze(logText, opts = {}) {
           : {
               verdict: "unknown",
               confidence: 0,
-              reason: "No history supplied — pass --history to separate flaky from real.",
+              reason: opts.historyFound
+                ? "History file has no records yet — run `cifd record` on a few CI runs first."
+                : "No history found — pass --history with a recorded run history, or run `cifd record` on a few CI runs first.",
             };
       // In-log retry evidence upgrades an "unknown" to "likely flaky".
       let verdict = flakyScore.verdict;
