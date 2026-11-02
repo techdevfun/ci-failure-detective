@@ -107,6 +107,7 @@ function main() {
     const history = readHistory(historyPath);
     const report = analyze(text, {
       history,
+      historyFound: existsSync(historyPath),
       commit: flags.commit || process.env.GITHUB_SHA || "",
       branch: flags.branch || process.env.GITHUB_REF_NAME || "",
     });
