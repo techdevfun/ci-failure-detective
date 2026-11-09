@@ -97,6 +97,32 @@ test("parsePytest captures -v PASSED lines", () => {
   assert.equal(tests.find((t) => t.status === "pass").name, "test_bulk_discount");
 });
 
+test("parsePytest captures real pytest -v lines (result after id, with [ NN%])", () => {
+  // Real `pytest -v` prints "tests/test_x.py::test_name PASSED [ 14%]" —
+  // the old PASSED-first regex matched a format pytest never prints, so
+  // -v pass records (same-commit flaky evidence) were silently dropped.
+  const lines = [
+    "tests/test_cart.py::test_bulk_discount PASSED [ 14%]",
+    "tests/test_cart.py::test_empty_cart PASSED [ 28%]",
+    "tests/test_cart.py::test_negative_qty FAILED [ 42%]",
+    "tests/test_cart.py::test_zero_price PASSED [ 57%]",
+  ];
+  const { tests } = parsePytest(lines);
+  assert.equal(tests.filter((t) => t.status === "pass").length, 3);
+  assert.equal(tests.filter((t) => t.status === "fail").length, 1);
+  assert.equal(tests.find((t) => t.status === "fail").name, "test_negative_qty");
+  assert.equal(tests.find((t) => t.status === "fail").file, "tests/test_cart.py");
+  assert.equal(
+    tests.find((t) => t.status === "pass").name,
+    "test_bulk_discount",
+  );
+  // Same shape without the progress percentage still parses.
+  const bare = parsePytest(["tests/test_cart.py::test_ok PASSED"]).tests;
+  assert.equal(bare.length, 1);
+  assert.equal(bare[0].status, "pass");
+  assert.equal(bare[0].name, "test_ok");
+});
+
 test("parseTestResults still picks by failing count, passes ride along", () => {
   const lines = [
     "PASS src/a.test.js",
