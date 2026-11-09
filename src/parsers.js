@@ -80,9 +80,26 @@ export function parsePytest(lines) {
   const tests = [];
   const failedRe = /^FAILED\s+(\S+?)(::(\S+))?\s+-/;
   const failedShort = /^FAILED\s+(\S+)/;
-  const passedRe = /^PASSED\s+(\S+?)(::(\S+))?\s*$/; // pytest -v passing test
+  // Real `pytest -v` lines put the result AFTER the id, with a progress
+  // percentage: "tests/test_x.py::test_name PASSED [ 14%]". The previous
+  // regex only matched a bare "PASSED <id>" line, which pytest never
+  // prints — so -v pass records (the same-commit flaky evidence) were
+  // silently dropped. The legacy "PASSED <id>" form is kept for old logs.
+  const passedVerboseRe = /^(\S+?)(::(\S+))?\s+PASSED(?:\s+\[\s*\d+%\])?\s*$/;
+  const passedRe = /^PASSED\s+(\S+?)(::(\S+))?\s*$/; // legacy PASSED-first form
+  const failedVerboseRe = /^(\S+?)(::(\S+))?\s+FAILED(?:\s+\[\s*\d+%\])?\s*$/;
   for (const line of lines) {
-    let m = line.match(passedRe);
+    let m = line.match(passedVerboseRe);
+    if (m) {
+      const filePart = m[1].split("::")[0];
+      tests.push({
+        name: m[3] || filePart,
+        file: filePart,
+        status: "pass",
+      });
+      continue;
+    }
+    m = line.match(passedRe);
     if (m) {
       const filePart = m[1].split("::")[0];
       tests.push({
@@ -95,6 +112,16 @@ export function parsePytest(lines) {
     m = line.match(failedRe);
     if (m) {
       // m[1] = file part (lazy match stops before "::"), m[3] = test name.
+      const filePart = m[1].split("::")[0];
+      tests.push({
+        name: m[3] || filePart,
+        file: filePart,
+        status: "fail",
+      });
+      continue;
+    }
+    m = line.match(failedVerboseRe);
+    if (m) {
       const filePart = m[1].split("::")[0];
       tests.push({
         name: m[3] || filePart,
